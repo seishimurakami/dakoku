@@ -1,6 +1,8 @@
 # dakoku
 Dakoku is a simple script that uses Python + Selenium to automatically log in to "King of Time" and prompt you to clock in.
 
+**King of Time って、キン・タイってダジャレだよね**
+
 * King of Time への打刻をpython + seleniumを使って自動化するスクリプト
 *
 * 事前準備：
