@@ -8,17 +8,22 @@
 *   Seleniumライブラリをインストーする
 *   % pip install selenium
 *
+*   Seleniumライブラリ 4.20でテストしています。
+*   % pip show selenium 
+*     Name: selenium
+*     Version: 4.20.0
+*
 * 使い方：
 *
-*   % python kintai-dakoku.py
+*   % python dakoku.py
 *
-*   Chromeブラウザが起動し、King of Timeへ自動ログインするので打刻しましょう
-*   打刻後60秒後にブラウザは自動終了します。
+*   Chromeブラウザが起動し、King of Timeへ自動ログインするので打刻しましょう。
+*   出勤・退勤ボタンが押されるか・ブラウザが閉じられるまで待機します。
 """
 # library
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.support.ui import WebDriverWait
 import time
 
 # setting
@@ -26,23 +31,38 @@ login_url='https://s3.ta.kingoftime.jp/independent/recorder2/personal/#'
 id="trme**********"
 password="*************"
 
-# Chrome Webドライバー の インスタンスを生成
+# Chrome Webdriverのインスタンスを生成
 driver = webdriver.Chrome()
 
-# WebドライバーでKing of Timeログインページを起動
+# King of Timeログインページを起動
 driver.get(login_url)
 
-driver.find_element(By.XPATH, "(//input[@type='text'])[1]").send_keys(id)
-driver.find_element(By.XPATH, "(//input[@type='password'])[1]").send_keys(password)
-# CLASS属性が”sessions_button--wide”であるHTML要素を取得してクリック
-driver.find_element(By.CLASS_NAME,"btn-control-message").click()
+try:
+    driver.find_element(By.XPATH, "(//input[@type='text'])[1]").send_keys(id)
+    driver.find_element(By.XPATH, "(//input[@type='password'])[1]").send_keys(password)
+    driver.find_element(By.CLASS_NAME,"btn-control-message").click()
+except:
+    print("ログインエラー")
+    driver.quit()
+    exit()
 
-# マイページへ移動
+# ログインページへ移動
 driver.get(login_url)
 
-print("打刻待ち...")
-time.sleep(60)
-print("終了")
+# 出勤・退勤ボタンが押されるか・ブラウザが閉じられるまで待機
+while True:
+    text_element = driver.find_element(By.CLASS_NAME,"notification-message").text
+    print(text_element)
+    if text_element == "退勤が完了しました。":
+        break
+    elif text_element == "出勤が完了しました。":
+        break
+    try: 
+        # ブラウザが閉じられた場合、例外が発生するので、例外処理でループを抜ける
+        driver.find_element(By.CLASS_NAME,"wrapper-all")
+        time.sleep(1)
+    except: 
+        break
 
-# Webドライバー の セッションを終了
+# Webdriverのセッションを終了
 driver.quit()
